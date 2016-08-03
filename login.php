@@ -1,25 +1,21 @@
 <?php
-/*
- * Codejudge
- * Copyright 2012, Sankha Narayan Guria (sankha93@gmail.com)
- * Licensed under MIT License.
- *
- * Codejudge Login page
- */
+
 	require_once('functions.php');
+	
 	if(loggedin())
 		header("Location: index.php");
 	else if(isset($_POST['action'])) {
-		$username = array_key_exists('username', $_POST) ? mysql_real_escape_string(trim($_POST['username'])) : "";
+		$username = mysqli_real_escape_string($_POST['username']);
 		if($_POST['action']=='login') {
-			if(trim($username) == "" or trim($_POST['password']) == "") {
-				header("Location: login.php?derror=1"); // empty entry
-			} else {
+			if(trim($username) == "" or trim($_POST['password']) == "")
+				{header("Location: login.php?derror=1");} // empty entry
+			else {
+
 				// code to login the user and start a session
 				connectdb();
 				$query = "SELECT salt,hash FROM users WHERE username='".$username."'";
-				$result = mysql_query($query);
-				$fields = mysql_fetch_array($result);
+				$result = mysqli_query($db,$query);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+				$fields = mysqli_fetch_array($result);
 				$currhash = crypt($_POST['password'], $fields['salt']);
 				if($currhash == $fields['hash']) {
 					$_SESSION['username'] = $username;
@@ -29,21 +25,23 @@
 			}
 		} else if($_POST['action']=='register') {
 			// register the user
-      $email = array_key_exists('email', $_POST) ? mysql_real_escape_string(trim($_POST['email'])) : "";
-			if(trim($username) == "" and trim($_POST['password']) == "" and trim($email) == "") {
+			echo "222";
+			$email = mysql_real_escape_string($_POST['email']);
+			if(trim($username) == "" or trim($_POST['password']) == "" or trim($email) == "")
 				header("Location: login.php?derror=1"); // empty entry
-			} else {
+			else {
+
 				// create the entry in the users table
 				connectdb();
 				$query = "SELECT salt,hash FROM users WHERE username='".$username."'";
-				$result = mysql_query($query);
-				if(mysql_num_rows($result)!=0) {
+				$result = mysqli_query($db,$query);
+				if(mysqli_num_rows($result)!=0)
 					header("Location: login.php?exists=1");
-				} else {
+				else {
 					$salt = randomAlphaNum(5);
 					$hash = crypt($_POST['password'], $salt);
-					$sql="INSERT INTO `users` ( `username` , `salt` , `hash` , `email`, `status` ) VALUES ('".$username."', '$salt', '$hash', '".$email."', '1')";
-					mysql_query($sql);
+					$sql="INSERT INTO `users` ( `username` , `salt` , `hash` , `email` ) VALUES ('".$username."', '$salt', '$hash', '".$email."')";
+					mysqli_query($db,$sql);echo "at 243";
 					header("Location: login.php?registered=1");
 				}
 			}
@@ -54,13 +52,13 @@
 <html lang="en"><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
-    <title><?php echo(getName()); ?> Login</title>
+    <title><?php echo(getName());?> Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
 
     <!-- Le styles -->
-    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="/css/bootstrap.css" rel="stylesheet">
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -131,6 +129,7 @@
         Password: <input type="password" name="password"/><br/>
         Email: <input type="email" name="email"/><br/><br/>
         <input class="btn btn-primary" type="submit" name="submit" value="Register"/>
+      </form>
     </div> <!-- /container -->
 
 <?php

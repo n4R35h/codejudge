@@ -1,11 +1,5 @@
 <?php
-/*
- * Codejudge
- * Copyright 2012, Sankha Narayan Guria (sankha93@gmail.com)
- * Licensed under MIT License.
- *
- * Solution submission page
- */
+
 	require_once('functions.php');
 	if(!loggedin())
 		header("Location: login.php");
@@ -27,11 +21,11 @@
     <div class="container">
     <?php
     	if(isset($_GET['terror']))
-          echo("<div class=\"alert alert-warning\">\nYour program exceeded the time limit. Maybe you should improve your algorithm.\n</div>");
+          echo("<div class=\"alert alert-warning\">\nYour program exceeded the time limit. Optimize your algorithm.\n</div>");
         if(isset($_GET['cerror']))
           echo("<div class=\"alert alert-error\">\n<strong>The following errors occured:</strong><br/>\n<pre>\n".$_SESSION['cerror']."\n</pre>\n</div>");
         else if(isset($_GET['oerror']))
-          echo("<div class=\"alert alert-error\">\nYour program output did not match the solution for the problem. Please check your program and try again.\n</div>");
+          echo("<div class=\"alert alert-error\">\nWrong Output\n</div>");
         else if(isset($_GET['lerror']))
           echo("<div class=\"alert alert-error\">\nYou did not use one of the allowed languages. Please use a language that is allowed.\n</div>");
         else if(isset($_GET['serror']))
@@ -42,11 +36,11 @@
           echo("<div class=\"alert alert-error\">\nPlease enter a legal filename.\n</div>");
           
         $query = "SELECT * FROM prefs";
-        $result = mysql_query($query);
-        $accept = mysql_fetch_array($result);
+        $result = mysqli_query($db,$query);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+        $accept = mysqli_fetch_array($result);
         $query = "SELECT status FROM users WHERE username='".$_SESSION['username']."'";
-        $result = mysql_query($query);
-        $status = mysql_fetch_array($result);
+        $result = mysqli_query($db,$query);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+        $status = mysqli_fetch_array($result);
         if($accept['accept'] == 0)
           echo("<div class=\"alert alert-error\">\nSubmissions are closed now!\n</div>");
         if($status['status'] == 0)
@@ -57,8 +51,8 @@
         // display the problem statement
       	if(isset($_GET['id']) and is_numeric($_GET['id'])) {
       		$query = "SELECT * FROM problems WHERE sl='".$_GET['id']."'";
-          	$result = mysql_query($query);
-          	$row = mysql_fetch_array($result);
+          	$result = mysqli_query($db,$query);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+          	$row = mysqli_fetch_array($result);
       		include('markdown.php');
 		$out = Markdown($row['text']);
 		echo("<hr/>\n<h1>".$row['name']."</h1>\n");
@@ -70,9 +64,9 @@
         // get the peviously submitted solution if exists
         if(is_numeric($_GET['id'])) {
           $query = "SELECT * FROM solve WHERE (problem_id='".$_GET['id']."' AND username='".$_SESSION['username']."')";
-          $result = mysql_query($query);
-          $num = mysql_num_rows($result);
-          $fields = mysql_fetch_array($result);
+          $result = mysqli_query($db,$query);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+          $num = mysqli_num_rows($result);
+          $fields = mysqli_fetch_array($result);
         }
       ?>
       <form method="post" action="eval.php">

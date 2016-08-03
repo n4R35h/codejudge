@@ -1,11 +1,5 @@
 <?php
-/*
- * Codejudge
- * Copyright 2012, Sankha Narayan Guria (sankha93@gmail.com)
- * Licensed under MIT License.
- *
- * Installation PHP Script
- */
+
 	require_once('functions.php');
 	if(isset($_POST['host'])) {
 		// create file 'dbinfo.php'
@@ -18,26 +12,36 @@
 		$l6 = '$compilerport='.$_POST['cport'].';';
 		fwrite($fp, "<?php\n$l1\n$l2\n$l3\n$l4\n$l5\n$l6\n?>");
 		fclose($fp);
-		include('dbinfo.php');
+		include('dbinfo.php');//print("stage 11");
 		// connect to the MySQL server
-		mysql_connect($host,$user,$password);
+		
+	$db = mysqli_connect($l1,$l2,$l3,$l4);if (!$db) {   die('Invalid query: ' . mysqli_error($db));}
+			
 		// create the database
-		mysql_query("CREATE DATABASE $database");
-		mysql_select_db($database) or die('Error connecting to database.');
+		$sql = "CREATE DATABASE IF NOT EXISTS nashOJ";
+		
+		$result = mysqli_query($db,$sql);//if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+		mysqli_select_db($db,$database) or die(mysqli_error($db));
+print($database);
 		// create the preferences table
-		mysql_query("CREATE TABLE `prefs` (
+print("stage 2");
+		$sql = "CREATE TABLE IF NOT EXISTS`prefs` (
   `name` varchar(30) NOT NULL,
   `accept` int(11) NOT NULL,
   `c` int(11) NOT NULL,
   `cpp` int(11) NOT NULL,
   `java` int(11) NOT NULL,
   `python` int(11) NOT NULL
-)");
+)";print("stage 112");
+		$result = mysqli_query($db,$sql);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
 		// fill it with default preferences
-		mysql_query("INSERT INTO `prefs` (`name`, `accept`, `c`, `cpp`, `java`, `python`) VALUES
-('Codejudge', 1, 1, 1, 1, 1)");
+
+		$sql = "INSERT INTO `prefs` (`name`, `accept`, `c`, `cpp`, `java`, `python`) VALUES
+('nashOJ', 1, 1, 1, 1, 1)";
+		$result = mysqli_query($db,$sql);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
 		// create the problems table
-		mysql_query("CREATE TABLE IF NOT EXISTS `problems` (
+		print("stage 2");
+		$sql = "CREATE TABLE IF NOT EXISTS `problems` (
   `sl` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `text` text NOT NULL,
@@ -45,9 +49,10 @@
   `output` text NOT NULL,
   `time` int(11) NOT NULL DEFAULT '3000',
   PRIMARY KEY (`sl`)
-)");
+)";
+		$result = mysqli_query($db,$sql);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
 		// create the solve table
-		mysql_query("CREATE TABLE IF NOT EXISTS `solve` (
+		$sql = "CREATE TABLE IF NOT EXISTS `solve` (
   `sl` int(11) NOT NULL AUTO_INCREMENT,
   `problem_id` int(11) NOT NULL,
   `username` varchar(25) NOT NULL,
@@ -57,9 +62,10 @@
   `filename` varchar(25) NOT NULL,
   `lang` varchar(20) NOT NULL,
   PRIMARY KEY (`sl`)
-)");
-		// create the users table
-		mysql_query("CREATE TABLE IF NOT EXISTS `users` (
+)";print("stage 144");
+		$result = mysqli_query($db,$sql);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
+		print("stage 3");
+		$sql = "CREATE TABLE IF NOT EXISTS `users` (
   `sl` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(25) NOT NULL,
   `salt` varchar(6) NOT NULL,
@@ -67,13 +73,14 @@
   `email` varchar(100) NOT NULL,
   `status` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`sl`)
-)");
+)";printf("32");
+		$result = mysqli_query($db,$sql);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
 		// create the user 'admin' with password 'admin'
 		$salt=randomAlphaNum(5);
 		$pass="admin";
 		$hash=crypt($pass,$salt);
 		$sql="INSERT INTO `users` ( `username` , `salt` , `hash` , `email` ) VALUES ('$pass', '$salt', '$hash', '".$_POST['email']."')";
-		mysql_query($sql);
+		$result = mysqli_query($db,$sql);if (!$result) {   die('Invalid query: ' . mysqli_error($result));}
 		header("Location: install.php?installed=1");
 	}
 ?>
@@ -81,7 +88,7 @@
 <html lang="en"><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
-    <title>Codejudge Setup</title>
+    <title>nashOJ Setup</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -123,7 +130,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">Codejudge Setup</a>
+          <a class="brand" href="#">nashOJ Setup</a>
         </div>
       </div>
     </div>
@@ -131,24 +138,24 @@
     <div class="container">
     <?php
       if(isset($_GET['installed'])) {?>
-        <div class="alert alert-success">Codejudge is successfully installed!</div>
+        <div class="alert alert-success">nashOJ is successfully installed!</div>
         
         You can login to the admin panel <a href="admin/">here</a> with the password <strong>admin</strong>. You can change it once you login to the admin panel.
     <?php  }else if(!file_exists("dbinfo.php")){ ?>
-    Welcome to the Codejudge setup. This will help you set up Codejudge on your server. Make sure that you have MySQL running before you proceed.
+    Welcome to the nashOJ setup. This will help you set up nashOJ on your server. Make sure that you have MySQL running before you proceed.
     <h1><small>Details</small></h1>
     <form action="install.php" method="post">
     Database Host: <input type="text" name="host" value="localhost"/><br/>
     Username: <input type="text" name="username"/><br/>
     Password: <input type="password" name="password"/><br/>
-    Database Name: <input type="text" name="name" value="codejudge"/><br/>
+    Database Name: <input type="text" name="name" value="nashOJ"/><br/>
     Email: <input type="email" name="email"/><br/>
     Compiler Server Host: <input type="text" name="chost" value="localhost"/><br/>
     Compiler Server Port: <input type="text" name="cport" value="3029"/><br/>
     <input type="submit" class="btn btn-primary" value="Install"/>
     </form>
     <?php } else {?>
-      <div class="alert alert-error">Codejudge is already installed. Please remove the files and re-install it.</div>
+      <div class="alert alert-error">nashOJ is already installed. Please remove the files and re-install it.</div>
     <?php } ?>
     </div> <!-- /container -->
 

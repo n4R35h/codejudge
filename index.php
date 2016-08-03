@@ -35,13 +35,19 @@
         <?php
         	// list all the problems from the database
         	$query = "SELECT * FROM problems";
-          	$result = mysql_query($query);
+          	$result = mysql_query($query) ;
+		if($result === FALSE) { 
+    			die(mysql_error()); // TODO: better error handling
+		}
           	if(mysql_num_rows($result)==0)
 			echo("<li>None</li>\n"); // no problems are there
 		else {
 			while($row = mysql_fetch_array($result)) {
+				error_reporting(E_ALL ^ E_NOTICE);
+
+
 				$sql = "SELECT status FROM solve WHERE (username='".$_SESSION['username']."' AND problem_id='".$row['sl']."')";
-				$res = mysql_query($sql);
+				if($res = mysql_query($sql));
 				$tag = "";
 				// decide the attempted or solve tag
 				if(mysql_num_rows($res) !== 0) {
